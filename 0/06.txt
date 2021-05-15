@@ -1,0 +1,25 @@
+title 0.6: New note (SPA)
+
+note over Browser:
+The user types text in the
+input field and presses Submit
+button. When pressed the default
+submit event is prevented.
+Instead JavaScript saves note
+to internal notes array, clears
+the form input, calls the
+function to re-render the notes
+list and the posts the new note
+to the server
+end note
+Browser->Server: HTTP POST https://studies.cs.helsinki.fi/exampleapp/new_note_spa
+note over Server:
+Server saves the new note.
+The server responds with
+status code 201 created.
+Server does not ask for a
+redirect, the browser stays
+on the same page, and it
+sends no further HTTP requests
+end note
+Server-->Browser:  response {message: "note created"}

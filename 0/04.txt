@@ -1,0 +1,34 @@
+title 0.4: new note
+
+note over Browser:
+The user types text in
+the input field and
+presses Submit button
+end note
+Browser->Server: HTTP POST https://studies.cs.helsinki.fi/exampleapp/new_note
+Server-->Browser: The server responds with HTTP: Status Code 302
+note over Server:
+This is a URL redirect,
+with which the server asks
+the browser to do a
+new HTTP GET request to
+the address defined in the
+header's Location:
+/exampleapp/notes
+end note
+Browser->Server: HTTP GET https://studies.cs.helsinki.fi/exampleapp/notes
+Server-->Browser: HTML-code
+Browser->Server: HTTP GET https://studies.cs.helsinki.fi/exampleapp/main.css
+Server-->Browser: main.css
+Browser->Server: HTTP GET https://studies.cs.helsinki.fi/exampleapp/main.js
+Server-->Browser: main.js
+note over Browser:
+Browser starts executing js code
+that requests JSON data from server
+end note
+Browser->Server: HTTP GET https://studies.cs.helsinki.fi/exampleapp/data.json
+Server-->Browser: data.json
+note over Browser:
+Browser executes the event handler
+that renders notes to display
+end note
