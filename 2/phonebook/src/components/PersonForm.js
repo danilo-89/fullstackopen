@@ -1,7 +1,7 @@
 import React from 'react'
 
 const PersonForm = (props) => {
-    console.log(props)
+
     return (
         <form onSubmit={props.addName}>
             <div>
