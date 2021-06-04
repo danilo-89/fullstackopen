@@ -17,16 +17,9 @@ function App() {
       })
   }
 
-  const api_key = process.env.REACT_APP_API_KEY
-    axios
-      .get('https://api.openweathermap.org/data/2.5/onecall?lat=33.44&lon=-94.04&exclude=hourly,daily&appid='+api_key)
-      .then(response => {
-        console.log(response.data)
-        console.log('promise 2 fulfilled')
-      })
-  
-
-  useEffect(()=>hook('https://restcountries.eu/rest/v2/all'), [])
+  useEffect(()=>{
+    hook('https://restcountries.eu/rest/v2/all')
+  }, [])
 
   const handleSearchChange = (event) => {
     setNewSearch(event.target.value)
@@ -49,6 +42,7 @@ function App() {
         population={showCountry[0].population}
         languages={showCountry[0].languages}
         flag={showCountry[0].flag}
+        latlng={showCountry[0].latlng}
       />
   } else if (showCountry.length > 1 && showCountry.length <= 10) {
     countryElement = showCountry.map((country) => {
