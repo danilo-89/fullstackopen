@@ -80,8 +80,9 @@ app.post('/api/persons', async (request, response, next) => {
 	const isExistingPerson = await Person.exists({ name: content.name });
 
 	if (isExistingPerson) {
-		return response.status(400).json({
-			error: 'name must be unique',
+		return next({
+			name: 'custom.nameNotUnique',
+			message: 'name must be unique',
 		});
 	}
 
@@ -117,7 +118,10 @@ const errorHandler = (error, request, response, next) => {
 
 	if (error.name === 'CastError') {
 		return response.status(400).send({ error: 'malformatted id' });
-	} else if (error.name === 'ValidationError') {
+	} else if (
+		error.name === 'ValidationError' ||
+		error.name === 'custom.nameNotUnique'
+	) {
 		return response.status(400).json({ error: error.message });
 	}
 
