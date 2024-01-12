@@ -14,19 +14,11 @@ const blogSchema = new mongoose.Schema({
 		type: Number,
 		default: 0,
 	},
+	user: {
+		type: mongoose.Schema.Types.ObjectId,
+		ref: 'User',
+	},
 });
-
-// number: {
-// 	type: String,
-// 	minLength: 8,
-// 	validate: {
-// 		validator: function (v) {
-// 			return /^\d{2,3}-\d+$/.test(v);
-// 		},
-// 		message: (props) => `${props.value} is not a valid phone number!`,
-// 	},
-// 	required: [true, 'Person phone number required'],
-// },
 
 blogSchema.set('toJSON', {
 	transform: (document, returnedObject) => {

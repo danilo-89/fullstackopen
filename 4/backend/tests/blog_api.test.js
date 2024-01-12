@@ -1,31 +1,35 @@
 // npm test -- tests/note_api.test.js
 const mongoose = require('mongoose');
+const bcrypt = require('bcryptjs');
 const supertest = require('supertest');
 const app = require('../app');
-
-const api = supertest(app);
 const Blog = require('../models/blog');
+const User = require('../models/user');
+const { initialBlogs, wrongToken, getToken } = require('./test_helper');
 
-const initialBlogs = [
-	{
-		title: 'First one',
-		author: 'Johnny T',
-		url: 'http://www.u.arizona.edu/~rubinson/copyright_violations/Go_To_Considered_Harmful.html',
-		likes: 9,
-	},
-	{
-		title: 'Second one',
-		author: 'Marcy U',
-		url: 'http://www.u.arizona.edu/~rubinson/copyright_violations/Go_To_Considered_Harmful.html',
-		likes: 0,
-	},
-	{
-		title: 'Third one',
-		author: 'Denny R',
-		url: 'http://www.test.com',
-		likes: 4,
-	},
-];
+const api = supertest.agent(app);
+
+beforeAll(async () => {
+	// delete all users
+	await User.deleteMany({});
+
+	const userData = {
+		username: 'tester',
+		password: 'secret',
+	};
+
+	// create new user
+	const passwordHash = await bcrypt.hash(userData.password, 10);
+	const user = new User({ username: userData.username, passwordHash });
+	const userResponse = await user.save();
+
+	console.log('userResponse');
+	console.log(userResponse);
+
+	// get and set Bearer token
+	const token = await getToken(api, userData);
+	api.auth(token, { type: 'bearer' });
+});
 
 beforeEach(async () => {
 	await Blog.deleteMany({});
@@ -61,7 +65,12 @@ describe('addition of new blog', () => {
 
 		const response = await api.get('/api/blogs');
 		expect(response.body).toHaveLength(3);
-		expect(response.body[2]).toMatchObject(initialBlogs[2]);
+		expect(response.body[2]).toMatchObject({
+			author: initialBlogs[2].author,
+			likes: initialBlogs[2].likes,
+			title: initialBlogs[2].title,
+			url: initialBlogs[2].url,
+		});
 	}, 100000);
 
 	test('verify if likes property is missing then it defaults to 0', async () => {
@@ -69,6 +78,7 @@ describe('addition of new blog', () => {
 			title: 'Test blog',
 			author: 'Robert C. Martin',
 			url: 'http://www.u.arizona.edu/~rubinson/copyright_violations/Go_To_Considered_Harmful.html',
+			user: '65a10c0859f7deaefe81808b',
 		};
 
 		const response = await api
@@ -90,6 +100,21 @@ describe('addition of new blog', () => {
 		const response = await api.post('/api/blogs').send(blogData).expect(400);
 
 		expect(response.body.error).toBe('title or url is missing');
+	}, 100000);
+
+	test('verify that adding a blog fails with the proper status code when Bearer token is absent', async () => {
+		const blogData = {
+			author: 'Robert C. Martin',
+			url: 'http://www.u.arizona.edu/~rubinson/copyright_violations/Go_To_Considered_Harmful.html',
+		};
+
+		const response = await api
+			.post('/api/blogs')
+			.unset('Authorization')
+			.send(blogData)
+			.expect(401);
+
+		expect(response.body.error).toBe('invalid or missing token');
 	}, 100000);
 });
 
@@ -141,6 +166,40 @@ describe('deletion of a blog', () => {
 		const id = postResponse.body.id;
 
 		await api.delete(`/api/blogs/${id}`).expect(204);
+	}, 100000);
+
+	test('verify that deleting a blog fails with the proper status code when Bearer token is absent', async () => {
+		const postResponse = await api
+			.post('/api/blogs')
+			.send(initialBlogs[0])
+			.expect(201)
+			.expect('Content-Type', /application\/json/);
+
+		const id = postResponse.body.id;
+
+		const response = await api
+			.delete(`/api/blogs/${id}`)
+			.unset('Authorization')
+			.expect(401);
+
+		expect(response.body.error).toBe('invalid or missing token');
+	}, 100000);
+
+	test('verify that deleting a blog fails with the proper status code when Bearer token is wrong', async () => {
+		const postResponse = await api
+			.post('/api/blogs')
+			.send(initialBlogs[0])
+			.expect(201)
+			.expect('Content-Type', /application\/json/);
+
+		const id = postResponse.body.id;
+
+		const response = await api
+			.delete(`/api/blogs/${id}`)
+			.set('Authorization', wrongToken)
+			.expect(401);
+
+		expect(response.body.error).toBe('invalid or missing token');
 	}, 100000);
 });
 

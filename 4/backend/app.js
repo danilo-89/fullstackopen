@@ -3,7 +3,13 @@ const app = express();
 const cors = require('cors');
 const mongoose = require('mongoose');
 
+// eliminating the try-catch
+require('express-async-errors');
+
+const loginRouter = require('./controllers/login');
 const blogsRouter = require('./controllers/blogs');
+const usersRouter = require('./controllers/users');
+
 const middleware = require('./utils/middleware');
 const config = require('./utils/config');
 const logger = require('./utils/logger');
@@ -26,8 +32,11 @@ mongoose
 app.use(cors());
 app.use(express.json());
 app.use(middleware.requestLogger);
+app.use(middleware.tokenExtractor);
 
-app.use('/api/blogs', blogsRouter);
+app.use('/api/login', loginRouter);
+app.use('/api/users', usersRouter);
+app.use('/api/blogs', middleware.userExtractor, blogsRouter);
 
 app.use(middleware.unknownEndpoint);
 app.use(middleware.errorHandler);
