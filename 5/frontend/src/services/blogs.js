@@ -15,4 +15,13 @@ const createNew = async (token, data) => {
 	return request;
 };
 
+const likeBlog = async (token, data) => {
+	const config = {
+		headers: { Authorization: `Bearer ${token}` },
+	};
+
+	const request = await axios.post(baseUrl, data, config);
+	return request;
+};
+
 export default { getAll, createNew };

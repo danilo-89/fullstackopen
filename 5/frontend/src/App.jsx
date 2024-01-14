@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 // Services
 import loginService from './services/login';
@@ -9,6 +9,7 @@ import Blog from './components/Blog';
 import Login from './components/Login';
 import CreateBlog from './components/CreateBlog';
 import Notification from './components/Notification';
+import Togglable from './components/Togglable';
 
 // Styles
 import './App.css';
@@ -20,6 +21,7 @@ const App = () => {
 	const [user, setUser] = useState(null);
 	const [errorMessage, setErrorMessage] = useState(null);
 	const [notification, setNotification] = useState(null);
+	const togglableRef = useRef();
 
 	const handleLogin = async (event) => {
 		event.preventDefault();
@@ -41,6 +43,47 @@ const App = () => {
 				message: 'Wrong username or password',
 				status: 'error',
 			});
+		}
+	};
+
+	const handleCreateBlog = async (data) => {
+		try {
+			const postResponse = await blogService.createNew(user.token, data);
+			console.log(postResponse);
+
+			if (postResponse.status === 201) {
+				setBlogs((curr) => [
+					...curr,
+					{
+						...postResponse.data,
+						user: { name: user.name, username: user.username },
+					},
+				]);
+				setNotification({
+					message: `Blog created successfully: ${postResponse.data.title} ${postResponse.data.author}`,
+					status: 'success',
+				});
+				togglableRef.current.toggleVisibility();
+			}
+		} catch (error) {
+			setNotification({
+				message: error?.response?.data?.error || error?.message,
+				status: 'error',
+			});
+		}
+	};
+
+	const handleDeleteBlog = async (blog) => {
+		console.log(blog);
+		const isConfirmed = confirm(`Remove blog ${blog.title} by ${blog.author}`);
+		if (isConfirmed) {
+		}
+	};
+
+	const handleLikeBlog = async (blog) => {
+		console.log(blog);
+		const isConfirmed = confirm(`Remove blog ${blog.title} by ${blog.author}`);
+		if (isConfirmed) {
 		}
 	};
 
@@ -84,16 +127,18 @@ const App = () => {
 						logout
 					</button>
 					<div>
-						<CreateBlog
-							user={user}
-							setBlogs={setBlogs}
-							setNotification={setNotification}
-						/>
+						<Togglable buttonLabel='new note' ref={togglableRef}>
+							<CreateBlog createNewBlog={handleCreateBlog} />
+						</Togglable>
 					</div>
 					<div>
 						<h2>blogs</h2>
 						{blogs.map((blog) => (
-							<Blog key={blog.id} blog={blog} />
+							<Blog
+								key={blog.id}
+								blog={blog}
+								handleDeleteBlog={handleDeleteBlog}
+							/>
 						))}
 					</div>
 				</div>
