@@ -1,4 +1,5 @@
 import axios from 'axios';
+// TODO: add env
 const baseUrl = 'http://localhost:3003/api/blogs';
 
 const getAll = async () => {
@@ -6,7 +7,7 @@ const getAll = async () => {
 	return request.data;
 };
 
-const createNew = async (token, data) => {
+const createBlog = async (token, data) => {
 	const config = {
 		headers: { Authorization: `Bearer ${token}` },
 	};
@@ -15,13 +16,22 @@ const createNew = async (token, data) => {
 	return request;
 };
 
-const likeBlog = async (token, data) => {
+const likeBlog = async (token, data, id) => {
 	const config = {
 		headers: { Authorization: `Bearer ${token}` },
 	};
 
-	const request = await axios.post(baseUrl, data, config);
+	const request = await axios.put(`${baseUrl}/${id}`, data, config);
 	return request;
 };
 
-export default { getAll, createNew };
+const deleteBlog = async (token, id) => {
+	const config = {
+		headers: { Authorization: `Bearer ${token}` },
+	};
+
+	const request = await axios.delete(`${baseUrl}/${id}`, config);
+	return request;
+};
+
+export default { getAll, createBlog, likeBlog, deleteBlog };

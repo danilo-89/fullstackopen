@@ -8,7 +8,7 @@ const blogStyle = {
 	marginBottom: 5,
 };
 
-const Blog = ({ blog, handleDeleteBlog }) => {
+const Blog = ({ blog, handleDeleteBlog, handleLikeBlog, showRemove }) => {
 	const [isExpanded, setIsExpanded] = useState(false);
 
 	return (
@@ -21,13 +21,23 @@ const Blog = ({ blog, handleDeleteBlog }) => {
 				<div>
 					<div>{blog.url}</div>
 					<div>
-						likes {blog.likes} <button type='button'>like</button>
+						likes {blog.likes}{' '}
+						<button
+							type='button'
+							onClick={() => {
+								handleLikeBlog(blog);
+							}}
+						>
+							like
+						</button>
 					</div>
 					<div>{blog.user.name}</div>
 					<div>
-						<button type='button' onClick={() => handleDeleteBlog(blog)}>
-							remove
-						</button>
+						{showRemove ? (
+							<button type='button' onClick={() => handleDeleteBlog(blog)}>
+								remove
+							</button>
+						) : null}
 					</div>
 				</div>
 			) : null}

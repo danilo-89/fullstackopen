@@ -48,7 +48,7 @@ const App = () => {
 
 	const handleCreateBlog = async (data) => {
 		try {
-			const postResponse = await blogService.createNew(user.token, data);
+			const postResponse = await blogService.createBlog(user.token, data);
 			console.log(postResponse);
 
 			if (postResponse.status === 201) {
@@ -56,7 +56,11 @@ const App = () => {
 					...curr,
 					{
 						...postResponse.data,
-						user: { name: user.name, username: user.username },
+						user: {
+							name: user.name,
+							username: user.username,
+							id: postResponse.data.user,
+						},
 					},
 				]);
 				setNotification({
@@ -77,13 +81,67 @@ const App = () => {
 		console.log(blog);
 		const isConfirmed = confirm(`Remove blog ${blog.title} by ${blog.author}`);
 		if (isConfirmed) {
+			try {
+				const deleteResponse = await blogService.deleteBlog(
+					user.token,
+					blog.id
+				);
+				console.log(deleteResponse);
+
+				if (deleteResponse.status === 204) {
+					setBlogs((curr) => {
+						return curr.filter((item) => item.id !== blog.id);
+					});
+					setNotification({
+						message: 'Blog deleted',
+						status: 'success',
+					});
+				}
+			} catch (error) {
+				setNotification({
+					message: error?.response?.data?.error || error?.message,
+					status: 'error',
+				});
+			}
 		}
 	};
 
 	const handleLikeBlog = async (blog) => {
 		console.log(blog);
-		const isConfirmed = confirm(`Remove blog ${blog.title} by ${blog.author}`);
-		if (isConfirmed) {
+		const { user: _user, id, ...requiredData } = blog;
+
+		const data = {
+			...requiredData,
+			likes: ++requiredData.likes,
+			user: blog.user.id,
+		};
+
+		console.log(data);
+
+		try {
+			const putResponse = await blogService.likeBlog(user.token, data, id);
+
+			console.log(putResponse);
+
+			if (putResponse.status === 200) {
+				setBlogs((curr) => {
+					const blogIndex = curr.findIndex((item) => item.id === id);
+					if (blogIndex > -1) {
+						const newData = [...curr];
+						newData[blogIndex].likes = putResponse.data.likes;
+						return newData;
+					}
+				});
+				setNotification({
+					message: 'Blog likes updated',
+					status: 'success',
+				});
+			}
+		} catch (error) {
+			setNotification({
+				message: error?.response?.data?.error || error?.message,
+				status: 'error',
+			});
 		}
 	};
 
@@ -128,7 +186,7 @@ const App = () => {
 					</button>
 					<div>
 						<Togglable buttonLabel='new note' ref={togglableRef}>
-							<CreateBlog createNewBlog={handleCreateBlog} />
+							<CreateBlog handleCreateBlog={handleCreateBlog} />
 						</Togglable>
 					</div>
 					<div>
@@ -138,6 +196,8 @@ const App = () => {
 								key={blog.id}
 								blog={blog}
 								handleDeleteBlog={handleDeleteBlog}
+								handleLikeBlog={handleLikeBlog}
+								showRemove={user.username === blog.user.username}
 							/>
 						))}
 					</div>

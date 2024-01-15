@@ -8,7 +8,7 @@ const Notification = ({ notification, setNotification }) => {
 				setNotification(null);
 			}, 5000);
 		}
-	}, [setNotification]);
+	}, [notification, setNotification]);
 
 	return <div className={notification?.status}>{notification?.message}</div>;
 };

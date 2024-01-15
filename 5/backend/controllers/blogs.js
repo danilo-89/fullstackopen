@@ -100,4 +100,18 @@ blogsRouter.patch('/:id', async (request, response) => {
 	}
 });
 
+blogsRouter.put('/:id', async (request, response) => {
+	const id = request.params.id;
+
+	try {
+		const result = await Blog.findByIdAndUpdate(id, request.body, {
+			new: true,
+		});
+		response.json(result);
+	} catch (error) {
+		console.error('Error patching blog:', error);
+		response.status(500).json({ error: 'Internal Server Error' });
+	}
+});
+
 module.exports = blogsRouter;
