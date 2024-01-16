@@ -10,20 +10,22 @@ const blogStyle = {
 
 const Blog = ({ blog, handleDeleteBlog, handleLikeBlog, showRemove }) => {
 	const [isExpanded, setIsExpanded] = useState(false);
+	// console.log(blog);
 
 	return (
-		<div style={blogStyle}>
+		<div style={blogStyle} className={`blog blog-${blog.id}`}>
 			{blog.title} {blog.author}
 			<button type='button' onClick={() => setIsExpanded((curr) => !curr)}>
 				{isExpanded ? 'hide' : 'show'}
 			</button>
 			{isExpanded ? (
-				<div>
+				<>
 					<div>{blog.url}</div>
 					<div>
 						likes {blog.likes}{' '}
 						<button
 							type='button'
+							data-cy='btn-like'
 							onClick={() => {
 								handleLikeBlog(blog);
 							}}
@@ -34,12 +36,16 @@ const Blog = ({ blog, handleDeleteBlog, handleLikeBlog, showRemove }) => {
 					<div>{blog.user.name}</div>
 					<div>
 						{showRemove ? (
-							<button type='button' onClick={() => handleDeleteBlog(blog)}>
+							<button
+								type='button'
+								onClick={() => handleDeleteBlog(blog)}
+								data-cy='btn-delete'
+							>
 								remove
 							</button>
 						) : null}
 					</div>
-				</div>
+				</>
 			) : null}
 		</div>
 	);

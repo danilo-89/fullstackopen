@@ -52,17 +52,20 @@ const App = () => {
 			console.log(postResponse);
 
 			if (postResponse.status === 201) {
-				setBlogs((curr) => [
-					...curr,
-					{
-						...postResponse.data,
-						user: {
-							name: user.name,
-							username: user.username,
-							id: postResponse.data.user,
+				setBlogs((curr) => {
+					const allBlogs = [
+						...curr,
+						{
+							...postResponse.data,
+							user: {
+								name: user.name,
+								username: user.username,
+								id: postResponse.data.user,
+							},
 						},
-					},
-				]);
+					].sort((a, b) => b.likes - a.likes);
+					return allBlogs;
+				});
 				setNotification({
 					message: `Blog created successfully: ${postResponse.data.title} ${postResponse.data.author}`,
 					status: 'success',
@@ -156,7 +159,8 @@ const App = () => {
 	useEffect(() => {
 		const fetchData = async () => {
 			const response = await blogService.getAll();
-			setBlogs(response);
+			const blogsSorted = response.sort((a, b) => b.likes - a.likes);
+			setBlogs(blogsSorted);
 		};
 
 		fetchData();
@@ -185,11 +189,11 @@ const App = () => {
 						logout
 					</button>
 					<div>
-						<Togglable buttonLabel='new note' ref={togglableRef}>
+						<Togglable buttonLabel='new blog' ref={togglableRef}>
 							<CreateBlog handleCreateBlog={handleCreateBlog} />
 						</Togglable>
 					</div>
-					<div>
+					<div className='blogs-list'>
 						<h2>blogs</h2>
 						{blogs.map((blog) => (
 							<Blog

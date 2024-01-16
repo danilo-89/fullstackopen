@@ -5,19 +5,15 @@ const CreateBlog = ({ handleCreateBlog }) => {
 	const [author, setAuthor] = useState('');
 	const [url, setUrl] = useState('');
 
-	const handleSubmission = (event) => {
+	const handleSubmission = (event, data) => {
 		event.preventDefault();
-		handleCreateBlog({
-			title,
-			author,
-			url,
-		});
+		handleCreateBlog(data);
 	};
 
 	return (
 		<>
 			<h2>create new</h2>
-			<form onSubmit={handleSubmission}>
+			<form onSubmit={(e) => handleSubmission(e, { title, author, url })}>
 				<div>
 					<label htmlFor='title'>title</label>
 					<input

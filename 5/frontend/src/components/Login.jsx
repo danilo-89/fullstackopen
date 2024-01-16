@@ -10,7 +10,8 @@ const Login = ({
 			<h1>log in to application</h1>
 			<form onSubmit={handleLogin}>
 				<div>
-					<label htmlFor=''>
+					<label>
+						username
 						<input
 							type='text'
 							name='username'
@@ -21,7 +22,8 @@ const Login = ({
 					</label>
 				</div>
 				<div>
-					<label htmlFor=''>
+					<label>
+						password
 						<input
 							type='password'
 							name='password'

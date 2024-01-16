@@ -1,5 +1,4 @@
 import axios from 'axios';
-// TODO: add env
 const baseUrl = 'http://localhost:3003/api/blogs';
 
 const getAll = async () => {
